@@ -46,7 +46,6 @@
     SOFTWARE.
 */
 
-#include <xc.h>
 #include "pin_manager.h"
 
 
@@ -111,7 +110,7 @@ void PIN_MANAGER_Initialize(void)
     //interrupt on change for group IOCCF - flag
     IOCCFbits.IOCCF4 = 0;
     //interrupt on change for group IOCCN - negative
-    IOCCNbits.IOCCN4 = 0;
+    IOCCNbits.IOCCN4 = 1;
     //interrupt on change for group IOCCP - positive
     IOCCPbits.IOCCP4 = 0;
 
