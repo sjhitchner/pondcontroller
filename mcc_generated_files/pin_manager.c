@@ -52,6 +52,8 @@ uint16_t pumpFlowCounter = 0;
 uint16_t pumpFlowCount = 0;
 unsigned char tick = 0;
 
+
+
 void (*IOCCF4_InterruptHandler)(void);
 
 
@@ -69,7 +71,7 @@ void PIN_MANAGER_Initialize(void)
     */
     TRISA = 0x13;
     TRISB = 0xF0;
-    TRISC = 0xDF;
+    TRISC = 0xFF;
 
     /**
     ANSELx registers
@@ -100,6 +102,7 @@ void PIN_MANAGER_Initialize(void)
     SLRCONB = 0xF0;
     SLRCONC = 0xFF;
     
+
     /**
     IOCx registers 
     */
@@ -118,6 +121,8 @@ void PIN_MANAGER_Initialize(void)
     // Enable IOCI interrupt 
     INTCONbits.IOCIE = 1; 
     
+	
+    RA2PPS = 0x0D;   //RA2->CCP2:CCP2;    
 }
   
 void PIN_MANAGER_IOC(void)

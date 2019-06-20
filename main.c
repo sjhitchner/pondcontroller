@@ -45,19 +45,22 @@
 
 #define PUMP_FLOW_FACTOR 8 // 7.5*Q (L/min) * (min/60s) = 7.5/60 Q (L/s)
 
-unsigned char pulseCount;
+
 
 struct PondStatus {
     uint16_t pumpFlowRate;
 };
 
+struct PondStatus pond;
+
+uint16_t dosingDutyCycle;
+unsigned char pulseCount;
+
 /*
-                         Main application
+ Main application
  */
 void main(void)
 {
-    struct PondStatus pond;
-   
     // initialize the device
     SYSTEM_Initialize();
 
@@ -74,10 +77,19 @@ void main(void)
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
-
+    
+    tick = 0;
+   
+    // Read from pump flow sensor
     pumpFlowCounter = 0;
     pumpFlowCount = 0;
-    tick = 0;
+ 
+    // Read from pot
+    dosingDutyCycle = 0;
+    
+    // Select first ADC channel
+    ADC_SelectChannel(DOSE_RATE);
+    ADC_StartConversion();
     
     while (1)
     {
@@ -88,6 +100,13 @@ void main(void)
             pond.pumpFlowRate = pumpFlowCount / PUMP_FLOW_FACTOR;
             tick--;
         }
+                
+        if (ADC_IsConversionDone()) {
+            dosingDutyCycle = ADC_GetConversionResult();
+            PWM2_LoadDutyValue(dosingDutyCycle>>2);
+            ADC_StartConversion();
+        }
+        
         /*
         if (pulseCount&0x1) {
             PULSE_COUNT_LOW_SetHigh();

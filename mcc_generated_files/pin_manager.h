@@ -71,6 +71,18 @@ extern unsigned char tick;
 #define PULL_UP_ENABLED      1
 #define PULL_UP_DISABLED     0
 
+// get/set RA2 procedures
+#define RA2_SetHigh()            do { LATAbits.LATA2 = 1; } while(0)
+#define RA2_SetLow()             do { LATAbits.LATA2 = 0; } while(0)
+#define RA2_Toggle()             do { LATAbits.LATA2 = ~LATAbits.LATA2; } while(0)
+#define RA2_GetValue()              PORTAbits.RA2
+#define RA2_SetDigitalInput()    do { TRISAbits.TRISA2 = 1; } while(0)
+#define RA2_SetDigitalOutput()   do { TRISAbits.TRISA2 = 0; } while(0)
+#define RA2_SetPullup()             do { WPUAbits.WPUA2 = 1; } while(0)
+#define RA2_ResetPullup()           do { WPUAbits.WPUA2 = 0; } while(0)
+#define RA2_SetAnalogMode()         do { ANSELAbits.ANSA2 = 1; } while(0)
+#define RA2_SetDigitalMode()        do { ANSELAbits.ANSA2 = 0; } while(0)
+
 // get/set TMR1_TICK aliases
 #define TMR1_TICK_TRIS                 TRISAbits.TRISA5
 #define TMR1_TICK_LAT                  LATAbits.LATA5
@@ -87,6 +99,26 @@ extern unsigned char tick;
 #define TMR1_TICK_ResetPullup()        do { WPUAbits.WPUA5 = 0; } while(0)
 #define TMR1_TICK_SetPushPull()        do { ODCONAbits.ODA5 = 0; } while(0)
 #define TMR1_TICK_SetOpenDrain()       do { ODCONAbits.ODA5 = 1; } while(0)
+
+// get/set DOSE_RATE aliases
+#define DOSE_RATE_TRIS                 TRISCbits.TRISC0
+#define DOSE_RATE_LAT                  LATCbits.LATC0
+#define DOSE_RATE_PORT                 PORTCbits.RC0
+#define DOSE_RATE_WPU                  WPUCbits.WPUC0
+#define DOSE_RATE_OD                   ODCONCbits.ODC0
+#define DOSE_RATE_ANS                  ANSELCbits.ANSC0
+#define DOSE_RATE_SetHigh()            do { LATCbits.LATC0 = 1; } while(0)
+#define DOSE_RATE_SetLow()             do { LATCbits.LATC0 = 0; } while(0)
+#define DOSE_RATE_Toggle()             do { LATCbits.LATC0 = ~LATCbits.LATC0; } while(0)
+#define DOSE_RATE_GetValue()           PORTCbits.RC0
+#define DOSE_RATE_SetDigitalInput()    do { TRISCbits.TRISC0 = 1; } while(0)
+#define DOSE_RATE_SetDigitalOutput()   do { TRISCbits.TRISC0 = 0; } while(0)
+#define DOSE_RATE_SetPullup()          do { WPUCbits.WPUC0 = 1; } while(0)
+#define DOSE_RATE_ResetPullup()        do { WPUCbits.WPUC0 = 0; } while(0)
+#define DOSE_RATE_SetPushPull()        do { ODCONCbits.ODC0 = 0; } while(0)
+#define DOSE_RATE_SetOpenDrain()       do { ODCONCbits.ODC0 = 1; } while(0)
+#define DOSE_RATE_SetAnalogMode()      do { ANSELCbits.ANSC0 = 1; } while(0)
+#define DOSE_RATE_SetDigitalMode()     do { ANSELCbits.ANSC0 = 0; } while(0)
 
 // get/set PULSE aliases
 #define PULSE_TRIS                 TRISCbits.TRISC4
@@ -212,6 +244,8 @@ extern void (*IOCCF4_InterruptHandler)(void);
 
 */
 void IOCCF4_DefaultInterruptHandler(void);
+
+
 
 #endif // PIN_MANAGER_H
 /**

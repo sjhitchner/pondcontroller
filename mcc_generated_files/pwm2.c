@@ -1,24 +1,24 @@
 /**
-  @Generated PIC10 / PIC12 / PIC16 / PIC18 MCUs Source File
+  PWM2 Generated Driver File
 
-  @Company:
+  @Company
     Microchip Technology Inc.
 
-  @File Name:
-    mcc.c
+  @File Name
+    pwm2.c
 
-  @Summary:
-    This is the mcc.c file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+  @Summary
+    This is the generated driver implementation file for the PWM2 driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
 
-  @Description:
-    This header file provides implementations for driver APIs for all modules selected in the GUI.
+  @Description
+    This source file provides implementations for driver APIs for PWM2.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.76
         Device            :  PIC16F1619
-        Driver Version    :  2.00
+        Driver Version    :  2.01
     The generated drivers are tested against the following:
-        Compiler          :  XC8 2.00 or later
-        MPLAB             :  MPLAB X 5.10
+        Compiler          :  XC8 2.00
+         MPLAB 	          :  MPLAB X 5.10
 */
 
 /*
@@ -44,31 +44,65 @@
     SOFTWARE.
 */
 
-#include "mcc.h"
+/**
+  Section: Included Files
+*/
 
+#include <xc.h>
+#include "pwm2.h"
 
-void SYSTEM_Initialize(void)
+/**
+  Section: Macro Declarations
+*/
+
+#define PWM2_INITIALIZE_DUTY_VALUE    0
+
+/**
+  Section: PWM Module APIs
+*/
+
+void PWM2_Initialize(void)
 {
-    PIN_MANAGER_Initialize();
-    OSCILLATOR_Initialize();
-    PWM2_Initialize();
-    TMR2_Initialize();
-    TMR1_Initialize();
-    ADC_Initialize();
+    // Set the PWM2 to the options selected in the User Interface
+	
+	// MODE PWM; EN enabled; FMT right_aligned; 
+	CCP2CON = 0x8F;    
+	
+	// RH 0; 
+	CCPR2H = 0x00;    
+	
+	// RL 0; 
+	CCPR2L = 0x00;    
+
+	// Selecting Timer 2
+	CCPTMRSbits.CCP2TSEL = 0x0;
+    
 }
 
-void OSCILLATOR_Initialize(void)
+void PWM2_LoadDutyValue(uint16_t dutyValue)
 {
-    // SCS FOSC; SPLLEN disabled; IRCF 500KHz_MF; 
-    OSCCON = 0x38;
-    // TUN 0; 
-    OSCTUNE = 0x00;
-    // SBOREN disabled; BORFS disabled; 
-    BORCON = 0x00;
+    dutyValue &= 0x03FF;
+    
+    // Load duty cycle value
+    if(CCP2CONbits.FMT)
+    {
+        dutyValue <<= 6;
+        CCPR2H = dutyValue >> 8;
+        CCPR2L = dutyValue;
+    }
+    else
+    {
+        CCPR2H = dutyValue >> 8;
+        CCPR2L = dutyValue;
+    }
 }
 
-
-
+bool PWM2_OutputStatusGet(void)
+{
+    // Returns the output status
+    return(CCP2CONbits.OUT);
+}
 /**
  End of File
 */
+
