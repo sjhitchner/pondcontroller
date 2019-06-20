@@ -43,13 +43,21 @@
 
 #include "mcc_generated_files/mcc.h"
 
+#define PUMP_FLOW_FACTOR 8 // 7.5*Q (L/min) * (min/60s) = 7.5/60 Q (L/s)
+
 unsigned char pulseCount;
+
+struct PondStatus {
+    uint16_t pumpFlowRate;
+};
 
 /*
                          Main application
  */
 void main(void)
 {
+    struct PondStatus pond;
+   
     // initialize the device
     SYSTEM_Initialize();
 
@@ -67,10 +75,20 @@ void main(void)
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
 
+    pumpFlowCounter = 0;
+    pumpFlowCount = 0;
+    tick = 0;
+    
     while (1)
     {
         __delay_ms(100);
         
+        // If a tick (second interval passed) do calculations
+        if (tick>0) {
+            pond.pumpFlowRate = pumpFlowCount / PUMP_FLOW_FACTOR;
+            tick--;
+        }
+        /*
         if (pulseCount&0x1) {
             PULSE_COUNT_LOW_SetHigh();
         } else {
@@ -82,6 +100,7 @@ void main(void)
         } else {
             PULSE_COUNT_HIGH_SetLow();
         }
+        */
     }
 }
 /**

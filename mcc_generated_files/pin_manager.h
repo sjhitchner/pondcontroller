@@ -52,8 +52,12 @@
 */
 
 #include <xc.h>
+#include <stdbool.h>
+#include <stdint.h>
 
-extern unsigned char pulseCount;
+extern uint16_t pumpFlowCounter;
+extern uint16_t pumpFlowCount;
+extern unsigned char tick;
 
 #define INPUT   1
 #define OUTPUT  0

@@ -166,6 +166,15 @@ void TMR1_ISR(void)
         TMR1_InterruptHandler();
     }
     
+    // Timer 1 record 1 sec intervals;
+    
+    // Copy number of pump flow pulses to count
+    pumpFlowCount = pumpFlowCounter;
+    
+    // record there was another tick/interval
+    tick++;
+    
+    // flash LED
     TMR1_TICK_Toggle();
 }
 

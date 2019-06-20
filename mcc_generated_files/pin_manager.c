@@ -48,8 +48,9 @@
 
 #include "pin_manager.h"
 
-
-
+uint16_t pumpFlowCounter = 0;
+uint16_t pumpFlowCount = 0;
+unsigned char tick = 0;
 
 void (*IOCCF4_InterruptHandler)(void);
 
@@ -98,11 +99,6 @@ void PIN_MANAGER_Initialize(void)
     SLRCONA = 0x37;
     SLRCONB = 0xF0;
     SLRCONC = 0xFF;
-
-    /**
-     Custom Variables
-     */
-    pulseCount = 0x0;
     
     /**
     IOCx registers 
@@ -137,12 +133,9 @@ void PIN_MANAGER_IOC(void)
    IOCCF4 Interrupt Service Routine
 */
 void IOCCF4_ISR(void) {
-
-    // Add custom IOCCF4 code
-    pulseCount++;
-    if (pulseCount > 3) {
-        pulseCount = 0;
-    }
+    
+    // Count pulses received by pump flow meter;
+    pumpFlowCounter++;
 
     // Call the interrupt handler for the callback registered at runtime
     if(IOCCF4_InterruptHandler)
