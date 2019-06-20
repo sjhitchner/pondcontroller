@@ -43,6 +43,8 @@
 
 #include "mcc_generated_files/mcc.h"
 
+unsigned char pulseCount;
+
 /*
                          Main application
  */
@@ -51,14 +53,13 @@ void main(void)
     // initialize the device
     SYSTEM_Initialize();
 
-    // When using interrupts, you need to set the Global and Peripheral Interrupt Enable bits
-    // Use the following macros to:
-
     // Enable the Global Interrupts
-    //INTERRUPT_GlobalInterruptEnable();
+    INTERRUPT_GlobalInterruptEnable();
 
     // Enable the Peripheral Interrupts
-    //INTERRUPT_PeripheralInterruptEnable();
+    INTERRUPT_PeripheralInterruptEnable();
+    
+    TMR1_StartTimer();
 
     // Disable the Global Interrupts
     //INTERRUPT_GlobalInterruptDisable();
@@ -68,7 +69,19 @@ void main(void)
 
     while (1)
     {
-        // Add your application code
+        __delay_ms(100);
+        
+        if (pulseCount&0x1) {
+            PULSE_COUNT_LOW_SetHigh();
+        } else {
+            PULSE_COUNT_LOW_SetLow();
+        }
+        
+        if (pulseCount&0x2) {
+            PULSE_COUNT_HIGH_SetHigh();
+        } else {
+            PULSE_COUNT_HIGH_SetLow();
+        }
     }
 }
 /**

@@ -50,6 +50,7 @@
 
 #include <xc.h>
 #include "tmr1.h"
+#include "pin_manager.h"
 
 /**
   Section: Global Variables Definitions
@@ -156,7 +157,6 @@ uint8_t TMR1_CheckGateValueStatus(void)
 
 void TMR1_ISR(void)
 {
-
     // Clear the TMR1 interrupt flag
     PIR1bits.TMR1IF = 0;
     TMR1_WriteTimer(timer1ReloadVal);
@@ -165,6 +165,8 @@ void TMR1_ISR(void)
     {
         TMR1_InterruptHandler();
     }
+    
+    TMR1_TICK_Toggle();
 }
 
 
