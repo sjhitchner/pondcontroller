@@ -71,26 +71,6 @@ extern unsigned char tick;
 #define PULL_UP_ENABLED      1
 #define PULL_UP_DISABLED     0
 
-// get/set PULSE_COUNT_HIGH aliases
-#define PULSE_COUNT_HIGH_TRIS                 TRISAbits.TRISA2
-#define PULSE_COUNT_HIGH_LAT                  LATAbits.LATA2
-#define PULSE_COUNT_HIGH_PORT                 PORTAbits.RA2
-#define PULSE_COUNT_HIGH_WPU                  WPUAbits.WPUA2
-#define PULSE_COUNT_HIGH_OD                   ODCONAbits.ODA2
-#define PULSE_COUNT_HIGH_ANS                  ANSELAbits.ANSA2
-#define PULSE_COUNT_HIGH_SetHigh()            do { LATAbits.LATA2 = 1; } while(0)
-#define PULSE_COUNT_HIGH_SetLow()             do { LATAbits.LATA2 = 0; } while(0)
-#define PULSE_COUNT_HIGH_Toggle()             do { LATAbits.LATA2 = ~LATAbits.LATA2; } while(0)
-#define PULSE_COUNT_HIGH_GetValue()           PORTAbits.RA2
-#define PULSE_COUNT_HIGH_SetDigitalInput()    do { TRISAbits.TRISA2 = 1; } while(0)
-#define PULSE_COUNT_HIGH_SetDigitalOutput()   do { TRISAbits.TRISA2 = 0; } while(0)
-#define PULSE_COUNT_HIGH_SetPullup()          do { WPUAbits.WPUA2 = 1; } while(0)
-#define PULSE_COUNT_HIGH_ResetPullup()        do { WPUAbits.WPUA2 = 0; } while(0)
-#define PULSE_COUNT_HIGH_SetPushPull()        do { ODCONAbits.ODA2 = 0; } while(0)
-#define PULSE_COUNT_HIGH_SetOpenDrain()       do { ODCONAbits.ODA2 = 1; } while(0)
-#define PULSE_COUNT_HIGH_SetAnalogMode()      do { ANSELAbits.ANSA2 = 1; } while(0)
-#define PULSE_COUNT_HIGH_SetDigitalMode()     do { ANSELAbits.ANSA2 = 0; } while(0)
-
 // get/set TMR1_TICK aliases
 #define TMR1_TICK_TRIS                 TRISAbits.TRISA5
 #define TMR1_TICK_LAT                  LATAbits.LATA5
@@ -124,23 +104,6 @@ extern unsigned char tick;
 #define PULSE_ResetPullup()        do { WPUCbits.WPUC4 = 0; } while(0)
 #define PULSE_SetPushPull()        do { ODCONCbits.ODC4 = 0; } while(0)
 #define PULSE_SetOpenDrain()       do { ODCONCbits.ODC4 = 1; } while(0)
-
-// get/set PULSE_COUNT_LOW aliases
-#define PULSE_COUNT_LOW_TRIS                 TRISCbits.TRISC5
-#define PULSE_COUNT_LOW_LAT                  LATCbits.LATC5
-#define PULSE_COUNT_LOW_PORT                 PORTCbits.RC5
-#define PULSE_COUNT_LOW_WPU                  WPUCbits.WPUC5
-#define PULSE_COUNT_LOW_OD                   ODCONCbits.ODC5
-#define PULSE_COUNT_LOW_SetHigh()            do { LATCbits.LATC5 = 1; } while(0)
-#define PULSE_COUNT_LOW_SetLow()             do { LATCbits.LATC5 = 0; } while(0)
-#define PULSE_COUNT_LOW_Toggle()             do { LATCbits.LATC5 = ~LATCbits.LATC5; } while(0)
-#define PULSE_COUNT_LOW_GetValue()           PORTCbits.RC5
-#define PULSE_COUNT_LOW_SetDigitalInput()    do { TRISCbits.TRISC5 = 1; } while(0)
-#define PULSE_COUNT_LOW_SetDigitalOutput()   do { TRISCbits.TRISC5 = 0; } while(0)
-#define PULSE_COUNT_LOW_SetPullup()          do { WPUCbits.WPUC5 = 1; } while(0)
-#define PULSE_COUNT_LOW_ResetPullup()        do { WPUCbits.WPUC5 = 0; } while(0)
-#define PULSE_COUNT_LOW_SetPushPull()        do { ODCONCbits.ODC5 = 0; } while(0)
-#define PULSE_COUNT_LOW_SetOpenDrain()       do { ODCONCbits.ODC5 = 1; } while(0)
 
 /**
    @Param
