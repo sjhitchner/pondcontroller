@@ -43,18 +43,41 @@
 
 #include "mcc_generated_files/mcc.h"
 
-#define PUMP_FLOW_FACTOR 8 // 7.5*Q (L/min) * (min/60s) = 7.5/60 Q (L/s)
+#define ADD_FLOW_SUM_TICK_TRIGGER 40
 
+uint16_t pumpFlowRate;
+uint16_t addFlowSum;  // Sum of how many ticks happened
+uint16_t addFlowSumPrevious;
+uint8_t addFlowSumTick = 0;
+uint16_t flow2Rate;
+bool dosePumpPrimeOn;
+uint8_t dosePumpPrimeCount;
 
+// Calibration values from ADC from pots
+uint16_t dosingPumpCalibration;
+uint16_t addFlowCalibration;
+uint16_t pumpFlowCalibration;
+uint16_t flow2Calibration;
+adc_channel_t currentADC;
 
-struct PondStatus {
-    uint16_t pumpFlowRate;
-};
+void initializeCalibrationValues();
+void selectAndStartNextADCConversion();
+void readCompletedADCConversion();
 
-struct PondStatus pond;
-
-uint16_t dosingDutyCycle;
-unsigned char pulseCount;
+/* 
+ * Notes
+ * Timer1
+ * 500kHz clock, 1:8 Pre-scaler => 524,288 max count
+ *  On interrupt need to initialize counter with 24,288 0x5ee0
+ * 
+ * TODO
+ * I2C
+ * OneWire
+ * 
+ *
+ * PWM2_LoadDutyValue(dosingDutyCycle>>2);
+ *  
+ */
 
 /*
  Main application
@@ -83,39 +106,145 @@ void main(void)
     // Pump flow sensor 
     pumpFlowCounter = 0;        // Read from pump flow sensor
     pumpFlowCount = 0;
- 
-    // Dosing Pump and Sensor
-    dosingDutyCycle = 0;        // Read from pot
-    dosingAddCounter = 0;       // Read from pump flow sensor
-    dosingAddCount = 0;
+    flow2Counter = 0;        // Read from pump flow sensor
+    flow2Count = 0;
+    addFlowCounter = 0;        // Read from pump flow sensor
+    addFlowCount = 0;
+    addFlowSum = 0;
+    addFlowSumPrevious = 0;
+    addFlowSumTick = 0;
     
-    // Select first ADC channel
-    ADC_SelectChannel(DOSE_RATE);
-    ADC_StartConversion();
+    dosePumpPrimeOn = false;
+    dosePumpPrimeCount = 0;
+    
+    // Dosing Pump and Sensor Calibration
+    dosingPumpCalibration = 0;
+    addFlowCalibration = 0;
+    pumpFlowCalibration = 0;
+    flow2Calibration = 0;
+    
+    initializeCalibrationValues();
+    selectAndStartNextADCConversion();
     
     while (1)
     {
-        __delay_ms(100);
+        __delay_ms(50);
         
         // If a tick (second interval passed) do calculations
         if (tick>0) {
-            pond.pumpFlowRate = pumpFlowCount / PUMP_FLOW_FACTOR;
+            calculatePumpFlowRate();
+            calculateFlow2Rate();
+            addFlowSum += addFlowCount;
             tick--;
         }
                 
         if (ADC_IsConversionDone()) {
-            dosingDutyCycle = ADC_GetConversionResult();
-            PWM2_LoadDutyValue(dosingDutyCycle>>2);
-            
-            ADC_StartConversion();
+            readCompletedADCConversion();
+            selectAndStartNextADCConversion();
+        }
+        
+        // Need to determine how much water was added
+        if (addFlowSum > 0 && ) {
+            if (addFlowSumPrevious == addFlowSum) {
+                addFlowSumTick++;
+                
+                if (addFlowSumTick > ADD_FLOW_SUM_TICK_TRIGGER) {
+                    // TODO Trigger dose pump for a given period
+                    addFlowSum = 0;
+                    addFlowSumPrevious = 0;
+                    addFlowSumTick = 0;
+                }
+            } else {
+                addFlowSumPrevious = addFlowSum;
+                addFlowSumTick = 0;
+            }
+        }
+        
+        // Prime Dose Pump
+        if (DOSE_PUMP_PRIME_GetValue() > 0) {
+            dosePumpPrimeCount++;
+            if (dosePumpPrimeCount > 4) {
+                dosePumpPrimeOn = true;
+                startDosePump();
+            }
+        } else {
+            dosePumpPrimeCount = 0;
+            if (dosePumpPrimeOn) {
+                stopDosePump();
+                dosePumpPrimeOn = false;
+            }
         }
     }
 }
-/**
- * Timer1
- * 500kHz clock, 1:8 Pre-scaler => 524,288 max count
- *  On interrupt need to initialize counter with 24,288 0x5ee0
- * 
- * 
- End of File
-*/
+
+// Pump flow sensor
+// F = 7.5 * Q (L/min) -> 7.5*Q (L/min) * (min/60s)
+// F = 7.5/60 Q (L/s)
+void calculatePumpFlowRate() {
+    uint16_t factor = pumpFlowCalibration >> 5; // Convert 10bit to (0-31) 5bit
+    pumpFlowRate = pumpFlowCount / factor;
+}
+
+void calculateFlow2Rate() {
+    uint16_t factor = flow2Calibration >> 5; // Convert 10bit to (0-31) 5bit
+    flow2Rate = flow2Count / factor;
+}
+
+// Initialize Calibration Values
+void initializeCalibrationValues() {
+    // Select first ADC channel
+    currentADC = FLOW_SENSOR_CAL_2;
+    
+    dosingPumpCalibration = ADC_GetConversion(DOSE_PUMP_DC_CAL);
+    addFlowCalibration = ADC_GetConversion(ADD_FLOW_SENSOR_CAL);
+    pumpFlowCalibration = ADC_GetConversion(PUMP_FLOW_SENSOR_CAL);
+    flow2Calibration = ADC_GetConversion(FLOW_SENSOR_CAL_2);
+}
+
+void selectAndStartNextADCConversion() {
+    switch (currentADC) {
+        case DOSE_PUMP_DC_CAL:
+            currentADC = ADD_FLOW_SENSOR_CAL;
+            break;
+        case ADD_FLOW_SENSOR_CAL:
+            currentADC = PUMP_FLOW_SENSOR_CAL;
+            break;
+        case PUMP_FLOW_SENSOR_CAL:
+            currentADC = FLOW_SENSOR_CAL_2;
+            break;
+        case FLOW_SENSOR_CAL_2:
+            currentADC = DOSE_PUMP_DC_CAL;
+            break;
+    }
+    
+    ADC_SelectChannel(currentADC);
+    ADC_StartConversion();   
+}
+
+void readCompletedADCConversion() {
+    uint16_t result = ADC_GetConversionResult();
+         
+    switch (currentADC) {
+        case DOSE_PUMP_DC_CAL:
+            dosingPumpCalibration = result;
+            break;
+        case ADD_FLOW_SENSOR_CAL:
+            addFlowCalibration = result;
+            break;
+        case PUMP_FLOW_SENSOR_CAL:
+            pumpFlowCalibration = result;
+            break;
+        case FLOW_SENSOR_CAL_2:
+            flow2Calibration = result;
+            break;
+    }
+}
+
+void startDosePump() {
+    PWM2_LoadDutyValue(dosingPumpCalibration>>2);
+}
+
+void stopDosePump() {
+    PWM2_LoadDutyValue(0x0);
+}
+

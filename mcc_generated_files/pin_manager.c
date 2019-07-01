@@ -50,9 +50,11 @@
 
 uint16_t pumpFlowCounter = 0;
 uint16_t pumpFlowCount = 0;
+uint16_t flow2Counter = 0;
+uint16_t flow2Count = 0;
+uint16_t addFlowCounter = 0;
+uint16_t addFlowCount = 0;
 unsigned char tick = 0;
-
-
 
 void (*IOCCF3_InterruptHandler)(void);
 void (*IOCCF6_InterruptHandler)(void);
@@ -148,16 +150,19 @@ void PIN_MANAGER_Initialize(void)
 void PIN_MANAGER_IOC(void)
 {   
 	// interrupt on change for pin IOCCF3
+    // ADD_FLOW_SENSOR
     if(IOCCFbits.IOCCF3 == 1)
     {
         IOCCF3_ISR();  
     }	
 	// interrupt on change for pin IOCCF6
+    // PUMP_FLOW_SENSOR
     if(IOCCFbits.IOCCF6 == 1)
     {
         IOCCF6_ISR();  
 }
 	// interrupt on change for pin IOCCF7
+    // FLOW_SENSOR_2
     if(IOCCFbits.IOCCF7 == 1)
     {
         IOCCF7_ISR();  
@@ -166,11 +171,12 @@ void PIN_MANAGER_IOC(void)
 
 /**
    IOCCF3 Interrupt Service Routine
+ * ADD_FLOW_SENSOR
 */
 void IOCCF3_ISR(void) {
     
     // Count pulses received by pump flow meter;
-    pumpFlowCounter++;
+    addFlowCounter++;
 
     // Call the interrupt handler for the callback registered at runtime
     if(IOCCF3_InterruptHandler)
@@ -197,10 +203,13 @@ void IOCCF3_DefaultInterruptHandler(void){
 
 /**
    IOCCF6 Interrupt Service Routine
+  PUMP_FLOW_SENSOR
 */
 void IOCCF6_ISR(void) {
 
     // Add custom IOCCF6 code
+    // Count pulses received by pump flow meter;
+    pumpFlowCounter++;
 
     // Call the interrupt handler for the callback registered at runtime
     if(IOCCF6_InterruptHandler)
@@ -227,10 +236,13 @@ void IOCCF6_DefaultInterruptHandler(void){
 
 /**
    IOCCF7 Interrupt Service Routine
+   FLOW_SENSOR_2
 */
 void IOCCF7_ISR(void) {
 
     // Add custom IOCCF7 code
+    // Count pulses received by pump flow meter;
+    flow2Counter++;
 
     // Call the interrupt handler for the callback registered at runtime
     if(IOCCF7_InterruptHandler)

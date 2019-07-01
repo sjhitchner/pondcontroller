@@ -170,12 +170,14 @@ void TMR1_ISR(void)
     
     // Copy number of pump flow pulses to count
     pumpFlowCount = pumpFlowCounter;
+    addFlowCount = addFlowCounter;
+    flow2Count = flow2Counter;
     
     // record there was another tick/interval
     tick++;
     
     // flash LED
-    TMR1_TICK_Toggle();
+    CLK_TICK_Toggle();
 }
 
 

@@ -57,6 +57,10 @@
 
 extern uint16_t pumpFlowCounter;
 extern uint16_t pumpFlowCount;
+extern uint16_t flow2Counter;
+extern uint16_t flow2Count;
+extern uint16_t addFlowCounter;
+extern uint16_t addFlowCount;
 extern unsigned char tick;
 
 #define INPUT   1
