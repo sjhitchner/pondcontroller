@@ -77,7 +77,7 @@ void PIN_MANAGER_Initialize(void)
     ANSELx registers
     */
     ANSELC = 0xCF;
-    ANSELB = 0xF0;
+    ANSELB = 0x30;
     ANSELA = 0x17;
 
     /**
@@ -122,7 +122,11 @@ void PIN_MANAGER_Initialize(void)
     INTCONbits.IOCIE = 1; 
     
 	
+    SSPDATPPS = 0x14;   //RC4->MSSP:SDA;    
+    RC4PPS = 0x11;   //RC4->MSSP:SDA;    
     RA2PPS = 0x0D;   //RA2->CCP2:CCP2;    
+    RC5PPS = 0x10;   //RC5->MSSP:SCL;    
+    SSPCLKPPS = 0x15;   //RC5->MSSP:SCL;    
 }
   
 void PIN_MANAGER_IOC(void)

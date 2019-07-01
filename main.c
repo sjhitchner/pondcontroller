@@ -80,12 +80,14 @@ void main(void)
     
     tick = 0;
    
-    // Read from pump flow sensor
-    pumpFlowCounter = 0;
+    // Pump flow sensor 
+    pumpFlowCounter = 0;        // Read from pump flow sensor
     pumpFlowCount = 0;
  
-    // Read from pot
-    dosingDutyCycle = 0;
+    // Dosing Pump and Sensor
+    dosingDutyCycle = 0;        // Read from pot
+    dosingAddCounter = 0;       // Read from pump flow sensor
+    dosingAddCount = 0;
     
     // Select first ADC channel
     ADC_SelectChannel(DOSE_RATE);
@@ -104,22 +106,9 @@ void main(void)
         if (ADC_IsConversionDone()) {
             dosingDutyCycle = ADC_GetConversionResult();
             PWM2_LoadDutyValue(dosingDutyCycle>>2);
+            
             ADC_StartConversion();
         }
-        
-        /*
-        if (pulseCount&0x1) {
-            PULSE_COUNT_LOW_SetHigh();
-        } else {
-            PULSE_COUNT_LOW_SetLow();
-        }
-        
-        if (pulseCount&0x2) {
-            PULSE_COUNT_HIGH_SetHigh();
-        } else {
-            PULSE_COUNT_HIGH_SetLow();
-        }
-        */
     }
 }
 /**

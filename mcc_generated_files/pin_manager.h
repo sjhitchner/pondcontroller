@@ -100,6 +100,46 @@ extern unsigned char tick;
 #define TMR1_TICK_SetPushPull()        do { ODCONAbits.ODA5 = 0; } while(0)
 #define TMR1_TICK_SetOpenDrain()       do { ODCONAbits.ODA5 = 1; } while(0)
 
+// get/set IO_RB6 aliases
+#define IO_RB6_TRIS                 TRISBbits.TRISB6
+#define IO_RB6_LAT                  LATBbits.LATB6
+#define IO_RB6_PORT                 PORTBbits.RB6
+#define IO_RB6_WPU                  WPUBbits.WPUB6
+#define IO_RB6_OD                   ODCONBbits.ODB6
+#define IO_RB6_ANS                  ANSELBbits.ANSB6
+#define IO_RB6_SetHigh()            do { LATBbits.LATB6 = 1; } while(0)
+#define IO_RB6_SetLow()             do { LATBbits.LATB6 = 0; } while(0)
+#define IO_RB6_Toggle()             do { LATBbits.LATB6 = ~LATBbits.LATB6; } while(0)
+#define IO_RB6_GetValue()           PORTBbits.RB6
+#define IO_RB6_SetDigitalInput()    do { TRISBbits.TRISB6 = 1; } while(0)
+#define IO_RB6_SetDigitalOutput()   do { TRISBbits.TRISB6 = 0; } while(0)
+#define IO_RB6_SetPullup()          do { WPUBbits.WPUB6 = 1; } while(0)
+#define IO_RB6_ResetPullup()        do { WPUBbits.WPUB6 = 0; } while(0)
+#define IO_RB6_SetPushPull()        do { ODCONBbits.ODB6 = 0; } while(0)
+#define IO_RB6_SetOpenDrain()       do { ODCONBbits.ODB6 = 1; } while(0)
+#define IO_RB6_SetAnalogMode()      do { ANSELBbits.ANSB6 = 1; } while(0)
+#define IO_RB6_SetDigitalMode()     do { ANSELBbits.ANSB6 = 0; } while(0)
+
+// get/set IO_RB7 aliases
+#define IO_RB7_TRIS                 TRISBbits.TRISB7
+#define IO_RB7_LAT                  LATBbits.LATB7
+#define IO_RB7_PORT                 PORTBbits.RB7
+#define IO_RB7_WPU                  WPUBbits.WPUB7
+#define IO_RB7_OD                   ODCONBbits.ODB7
+#define IO_RB7_ANS                  ANSELBbits.ANSB7
+#define IO_RB7_SetHigh()            do { LATBbits.LATB7 = 1; } while(0)
+#define IO_RB7_SetLow()             do { LATBbits.LATB7 = 0; } while(0)
+#define IO_RB7_Toggle()             do { LATBbits.LATB7 = ~LATBbits.LATB7; } while(0)
+#define IO_RB7_GetValue()           PORTBbits.RB7
+#define IO_RB7_SetDigitalInput()    do { TRISBbits.TRISB7 = 1; } while(0)
+#define IO_RB7_SetDigitalOutput()   do { TRISBbits.TRISB7 = 0; } while(0)
+#define IO_RB7_SetPullup()          do { WPUBbits.WPUB7 = 1; } while(0)
+#define IO_RB7_ResetPullup()        do { WPUBbits.WPUB7 = 0; } while(0)
+#define IO_RB7_SetPushPull()        do { ODCONBbits.ODB7 = 0; } while(0)
+#define IO_RB7_SetOpenDrain()       do { ODCONBbits.ODB7 = 1; } while(0)
+#define IO_RB7_SetAnalogMode()      do { ANSELBbits.ANSB7 = 1; } while(0)
+#define IO_RB7_SetDigitalMode()     do { ANSELBbits.ANSB7 = 0; } while(0)
+
 // get/set DOSE_RATE aliases
 #define DOSE_RATE_TRIS                 TRISCbits.TRISC0
 #define DOSE_RATE_LAT                  LATCbits.LATC0
@@ -136,6 +176,23 @@ extern unsigned char tick;
 #define PULSE_ResetPullup()        do { WPUCbits.WPUC4 = 0; } while(0)
 #define PULSE_SetPushPull()        do { ODCONCbits.ODC4 = 0; } while(0)
 #define PULSE_SetOpenDrain()       do { ODCONCbits.ODC4 = 1; } while(0)
+
+// get/set SCL aliases
+#define SCL_TRIS                 TRISCbits.TRISC5
+#define SCL_LAT                  LATCbits.LATC5
+#define SCL_PORT                 PORTCbits.RC5
+#define SCL_WPU                  WPUCbits.WPUC5
+#define SCL_OD                   ODCONCbits.ODC5
+#define SCL_SetHigh()            do { LATCbits.LATC5 = 1; } while(0)
+#define SCL_SetLow()             do { LATCbits.LATC5 = 0; } while(0)
+#define SCL_Toggle()             do { LATCbits.LATC5 = ~LATCbits.LATC5; } while(0)
+#define SCL_GetValue()           PORTCbits.RC5
+#define SCL_SetDigitalInput()    do { TRISCbits.TRISC5 = 1; } while(0)
+#define SCL_SetDigitalOutput()   do { TRISCbits.TRISC5 = 0; } while(0)
+#define SCL_SetPullup()          do { WPUCbits.WPUC5 = 1; } while(0)
+#define SCL_ResetPullup()        do { WPUCbits.WPUC5 = 0; } while(0)
+#define SCL_SetPushPull()        do { ODCONCbits.ODC5 = 0; } while(0)
+#define SCL_SetOpenDrain()       do { ODCONCbits.ODC5 = 1; } while(0)
 
 /**
    @Param
