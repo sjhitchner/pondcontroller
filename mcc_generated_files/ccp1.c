@@ -1,26 +1,24 @@
 /**
-  Generated Interrupt Manager Source File
+  CCP1 Generated Driver File
 
-  @Company:
+  @Company
     Microchip Technology Inc.
 
-  @File Name:
-    interrupt_manager.c
+  @File Name
+    ccp1.c
 
-  @Summary:
-    This is the Interrupt Manager file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+  @Summary
+    This is the generated driver implementation file for the CCP1 driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
 
-  @Description:
-    This header file provides implementations for global interrupt handling.
-    For individual peripheral handlers please see the peripheral driver for
-    all modules selected in the GUI.
+  @Description
+    This source file provides implementations for driver APIs for CCP1.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.76
         Device            :  PIC16F1619
-        Driver Version    :  2.03
+        Driver Version    :  2.01
     The generated drivers are tested against the following:
-        Compiler          :  XC8 2.00 or later
-        MPLAB 	          :  MPLAB X 5.10
+        Compiler          :  XC8 2.00
+         MPLAB 	          :  MPLAB X 5.10
 */
 
 /*
@@ -46,40 +44,21 @@
     SOFTWARE.
 */
 
-#include "interrupt_manager.h"
-#include "mcc.h"
-
-void __interrupt() INTERRUPT_InterruptManager (void)
+#include <xc.h>
+#include "ccp1.h"
+void CCP1_Initialize(void)
 {
-    // interrupt handler
-    if(INTCONbits.IOCIE == 1 && INTCONbits.IOCIF == 1)
-    {
-        PIN_MANAGER_IOC();
-    }
-    else if(INTCONbits.PEIE == 1)
-    {
-        if(PIE2bits.BCL1IE == 1 && PIR2bits.BCL1IF == 1)
-        {
-            i2c_driver_busCollisionISR();
-        } 
-        else if(PIE1bits.SSP1IE == 1 && PIR1bits.SSP1IF == 1)
-        {
-            i2c_driver_i2cISR();
-        } 
-        else if(PIE1bits.TMR1IE == 1 && PIR1bits.TMR1IF == 1)
-        {
-            TMR1_ISR();
-        } 
-        else
-        {
-            //Unhandled Interrupt
-        }
-    }      
-    else
-    {
-        //Unhandled Interrupt
-    }
+	
+	// MODE off/reset; EN disabled; FMT right_aligned; 
+	CCP1CON = 0x00;    
+	
+	// RH 0; 
+	CCPR1H = 0x00;    
+	
+	// RL 0; 
+	CCPR1L = 0x00;    
+	
+	// CTS CCP1 pin; 
+	CCP1CAP = 0x00;    
 }
-/**
- End of File
-*/
+

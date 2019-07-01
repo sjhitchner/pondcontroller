@@ -94,7 +94,10 @@ typedef struct
 
 typedef enum
 {
-    DOSE_RATE =  0x4,
+    DOSE_PUMP_DC_CAL =  0x5,
+    ADD_FLOW_SENSOR_CAL =  0x6,
+    PUMP_FLOW_SENSOR_CAL =  0xA,
+    FLOW_SENSOR_CAL_2 =  0xB,
     channel_Temp =  0x1D,
     channel_DAC =  0x1E,
     channel_FVR =  0x1F

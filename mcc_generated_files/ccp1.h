@@ -1,25 +1,23 @@
 /**
-  Generated Interrupt Manager Source File
+  CCP1 Generated Driver API Header File
 
-  @Company:
+  @Company
     Microchip Technology Inc.
 
-  @File Name:
-    interrupt_manager.c
+  @File Name
+    ccp1.h
 
-  @Summary:
-    This is the Interrupt Manager file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+  @Summary
+    This is the generated header file for the CCP1 driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
 
-  @Description:
-    This header file provides implementations for global interrupt handling.
-    For individual peripheral handlers please see the peripheral driver for
-    all modules selected in the GUI.
+  @Description
+    This header file provides APIs for driver for CCP1.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.76
         Device            :  PIC16F1619
-        Driver Version    :  2.03
+        Driver Version    :  2.01
     The generated drivers are tested against the following:
-        Compiler          :  XC8 2.00 or later
+        Compiler          :  XC8 2.00
         MPLAB 	          :  MPLAB X 5.10
 */
 
@@ -46,40 +44,19 @@
     SOFTWARE.
 */
 
-#include "interrupt_manager.h"
-#include "mcc.h"
+#ifndef CCP1_H
+#define CCP1_H
 
-void __interrupt() INTERRUPT_InterruptManager (void)
-{
-    // interrupt handler
-    if(INTCONbits.IOCIE == 1 && INTCONbits.IOCIF == 1)
-    {
-        PIN_MANAGER_IOC();
-    }
-    else if(INTCONbits.PEIE == 1)
-    {
-        if(PIE2bits.BCL1IE == 1 && PIR2bits.BCL1IF == 1)
-        {
-            i2c_driver_busCollisionISR();
-        } 
-        else if(PIE1bits.SSP1IE == 1 && PIR1bits.SSP1IF == 1)
-        {
-            i2c_driver_i2cISR();
-        } 
-        else if(PIE1bits.TMR1IE == 1 && PIR1bits.TMR1IF == 1)
-        {
-            TMR1_ISR();
-        } 
-        else
-        {
-            //Unhandled Interrupt
-        }
-    }      
-    else
-    {
-        //Unhandled Interrupt
-    }
-}
+#include <xc.h>
 /**
- End of File
-*/
+ * Initialization routine that takes inputs from the GUI.
+ * @prototype        void CCP1_Initialize(void)
+ * @param           none
+ * @return           none
+ * @comment          
+ * @usage            CCP1_Initialize();
+ */
+void CCP1_Initialize(void);
+
+
+#endif  // CCP1.h
