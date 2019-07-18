@@ -1,0 +1,10 @@
+mode: count
+github.com/sjhitchner/pondcontroller/peripherals/addflow/addflow.go:28.107,38.2 1 1
+github.com/sjhitchner/pondcontroller/peripherals/addflow/addflow.go:40.40,44.16 3 1
+github.com/sjhitchner/pondcontroller/peripherals/addflow/addflow.go:49.2,53.6 4 1
+github.com/sjhitchner/pondcontroller/peripherals/addflow/addflow.go:44.16,46.3 1 0
+github.com/sjhitchner/pondcontroller/peripherals/addflow/addflow.go:53.6,54.10 1 119
+github.com/sjhitchner/pondcontroller/peripherals/addflow/addflow.go:55.24,57.28 2 115
+github.com/sjhitchner/pondcontroller/peripherals/addflow/addflow.go:59.18,78.11 6 3
+github.com/sjhitchner/pondcontroller/peripherals/addflow/addflow.go:80.16,81.14 1 1
+github.com/sjhitchner/pondcontroller/peripherals/addflow/addflow.go:86.40,89.2 2 1
