@@ -1,10 +1,10 @@
 package pump
 
 import (
-	"log"
 	"time"
 
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/sjhitchner/gpio"
 )
 
@@ -40,12 +40,12 @@ func (t *pumpImpl) IsOn() bool {
 }
 
 func (t *pumpImpl) On() {
-	log.Println("pump on")
+	log.Infof("pump on")
 	t.pin.Set()
 }
 
 func (t *pumpImpl) Off() {
-	log.Println("pump off")
+	log.Infof("pump off")
 	t.pin.Clear()
 }
 

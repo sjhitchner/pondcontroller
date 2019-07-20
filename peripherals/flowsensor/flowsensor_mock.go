@@ -10,8 +10,8 @@ func NewMockFlowSensor() *MockFlowSensor {
 	}
 }
 
-func (t *MockFlowSensor) PerSecondFlow() (<-chan int, error) {
-	return t.C, nil
+func (t *MockFlowSensor) PerSecondFlow() <-chan int {
+	return t.C
 }
 
 func (t *MockFlowSensor) Close() error {

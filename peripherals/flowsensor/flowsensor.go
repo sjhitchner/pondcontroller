@@ -8,10 +8,27 @@ import (
 	"github.com/sjhitchner/gpio"
 )
 
+const (
+	// Twelve trials 371
+	// 393
+	// 331
+	// 319
+	// 342
+	// 432
+	// 373
+	// 335
+	// 325
+	// 419
+	// 402
+	// 351
+	// 419 = 4441 / 12 = 370.083
+	DefaultTicksPerLiter = 370
+)
+
 // Defines New flow sensor
 // Access flow per second flow rate by listen to channel
 type FlowSensor interface {
-	PerSecondFlow() (<-chan int, error)
+	PerSecondFlow() <-chan int
 	Close() error
 }
 
@@ -29,22 +46,24 @@ func NewFlowSensor(pin int) (FlowSensor, error) {
 		return nil, errors.Wrapf(err, "error initializing flow sensor on %d", pin)
 	}
 
-	return &flowSensorImpl{
+	sensor := &flowSensorImpl{
 		pinNum:  pin,
 		pin:     sensorPin,
 		counter: 0,
 		end:     make(chan bool),
-	}, nil
+	}
+
+	if err := sensorPin.BeginWatch(gpio.EdgeRising, func() {
+		atomic.AddUint32(&sensor.counter, 1)
+	}); err != nil {
+		return nil, errors.Wrapf(err, "error initializing flow sensor interrupt on %d", pin)
+	}
+
+	return sensor, nil
 }
 
-func (t *flowSensorImpl) PerSecondFlow() (<-chan int, error) {
+func (t *flowSensorImpl) PerSecondFlow() <-chan int {
 	ch := make(chan int, 10)
-
-	if err := t.pin.BeginWatch(gpio.EdgeRising, func() {
-		atomic.AddUint32(&t.counter, 1)
-	}); err != nil {
-		return nil, errors.Wrapf(err, "error initializing flow sensor interrupt on %d", t.pinNum)
-	}
 
 	ticker := time.NewTicker(time.Second)
 
@@ -55,18 +74,19 @@ func (t *flowSensorImpl) PerSecondFlow() (<-chan int, error) {
 		for {
 			select {
 			case <-ticker.C:
-				ch <- int(atomic.SwapUint32(&t.counter, 0))
+				value := int(atomic.SwapUint32(&t.counter, 0))
+				ch <- value
 			case <-t.end:
 				return
 			}
 		}
 	}()
 
-	return ch, nil
+	return ch
 }
 
 func (t *flowSensorImpl) Close() error {
-	t.end <- true
 	t.pin.EndWatch()
+	t.end <- true
 	return t.pin.Close()
 }

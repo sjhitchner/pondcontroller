@@ -3,14 +3,20 @@ package main
 import (
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"os/signal"
+	"time"
 
 	log "github.com/sirupsen/logrus"
+
+	//"github.com/sjhitchner/gpio"
 
 	"github.com/sjhitchner/pondcontroller/peripherals/addflow"
 	"github.com/sjhitchner/pondcontroller/peripherals/flowsensor"
 	"github.com/sjhitchner/pondcontroller/peripherals/pump"
+	"github.com/sjhitchner/pondcontroller/peripherals/pumpflow"
+	"github.com/sjhitchner/pondcontroller/peripherals/temponewire"
 )
 
 /*
@@ -53,11 +59,16 @@ Periphals
 */
 
 const (
-	DosePumpPin       = 0
-	TempOneWirePin    = 19
+	DosePumpPrimePin = 11
+	DosePumpPin      = 18
+
+	TempOneWirePin = 5 // SDA
+
 	AddFlowSensorPin  = 2
 	PumpFlowSensorPin = 3
-	DosePumpPrime     = 11
+
+	FeederPin     = 19
+	FeederCtrlPin = 4 // SCL
 
 	LedRedPin   = 17
 	LedGreenPin = 16
@@ -65,12 +76,77 @@ const (
 )
 
 // TODO configuration
+// Statistics
+
 func main() {
+	//log.AddHook()
+	log.SetLevel(log.DebugLevel)
+	log.SetFormatter(&log.JSONFormatter{})
+
+	//if err := Setup(); err != nil {
+	//	panic(err)
+	//}
+	Tinker()
+}
+
+func Tinker() {
+
+	temp, err := temponewire.NewOneWireTemp(TempOneWirePin)
+	if err != nil {
+		panic(err)
+	}
+	ch := temp.Start(time.Second)
+
+	for v := range ch {
+		fmt.Printf("Temp: %f", v)
+	}
+
+	/*
+		scl, err := gpio.OpenPin(4, gpio.ModeOutput)
+		if err != nil {
+			panic(err)
+		}
+
+		sda, err := gpio.OpenPin(5, gpio.ModeOutput)
+		if err != nil {
+			panic(err)
+		}
+
+		for {
+			scl.Set()
+			sda.Clear()
+			<-time.After(time.Second)
+			sda.Set()
+			scl.Clear()
+			<-time.After(time.Second)
+		}
+
+			pwm, err := gpio.OpenPin(18, gpio.ModeOutput)
+			if err != nil {
+				return nil, errors.Wrapf(err, "error initializing %d", 18)
+			}
+	*/
+
 }
 
 func Setup() error {
+	defer func() {
+		err := recover()
+		if err != nil {
+			entry := err.(*log.Entry)
+			log.WithFields(log.Fields{
+				"err_level":   entry.Level,
+				"err_message": entry.Message,
+			}).Fatal("Segmentation fault!")
+		}
+	}()
 
-	addFlowSensor, err := NewFlowSensor(AddFlowSensorPin)
+	pumpFlowSensor, err := flowsensor.NewFlowSensor(PumpFlowSensorPin)
+	if err != nil {
+		return err
+	}
+
+	addFlowSensor, err := flowsensor.NewFlowSensor(AddFlowSensorPin)
 	if err != nil {
 		return err
 	}
@@ -80,26 +156,26 @@ func Setup() error {
 		return err
 	}
 
-	addFlowMonitor, err := addflow.NewAddFlowMonitor(dosePump, addFlowSensor)
-	if err != nil {
-		return err
-	}
-	if err := addFlowMonitor.Start(); err != nil {
-		return err
-	}
+	addFlowMonitor := addflow.NewAddFlowMonitor(dosePump, addFlowSensor)
+	addFlowMonitor.Start()
 
-	Shutdown(addFlowMonitor, addFlowSensor, dosePump)
+	pumpFlowMonitor := pumpflow.NewPumpFlowMonitor(pumpFlowSensor)
+	//pumpFlowMonitor.Start()
+
+	Shutdown(pumpFlowMonitor, addFlowMonitor, addFlowSensor, dosePump)
+
+	return http.ListenAndServe(":8080", nil)
 }
 
-func Shutdown(closers ...io.Close) {
+func Shutdown(closers ...io.Closer) {
 	ch := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
+	signal.Notify(ch, os.Interrupt)
 
 	go func() {
 		for _ = range ch {
 			fmt.Printf("\nClearing and unexporting the pin.\n")
 
-			for c := range closers {
+			for _, c := range closers {
 				err := c.Close()
 				if err != nil {
 					log.Error(err)
@@ -265,6 +341,70 @@ func main() {
 		}
 }
 */
+
+/*
+      https://docs.onion.io/omega2-docs/generating-pwm-signals.html
+/sys/class/pwm
+root@Omega-C0FB:/# ls /sys/class/pwm
+pwmchip0
+
+In the pwmchip0 directory we find several files and directories:
+
+# ls /sys/class/pwm/pwmchip0/
+device     export     npwm       pwm0       subsystem  uevent     unexport
+A brief description of each of these directories. More detail can be found in the Linux kernel sysfs PWM interface documentation:
+
+device - Symlink to device information such as the device tree node, hardware device information etc.
+export - Write the PWM channel ascii character to this file to cause it to be accessible via sysfs, for example write ‘2’ to export channel 2
+npwm - File containing the number of PWM modules (4 for the Omega)
+subsystem - Symlink back to the sysfs directory of the class of this device, for example ‘/sys/class/pwm’ as this directory is for interacting with a pwm
+uevent - Used to register notifications for when devices are added, removed or other events occur.
+unexport - Opposite of ‘export’. Write the PWM channel ascii character to cause the file to be released from sysfs usage.
+Sysfs Example
+Here is an example of how to configure and enable a pwm PWM from the command line:
+
+# cd /sys/class/pwm/pwmchip0
+# ls
+
+		# omega2-ctrl gpiomux set pwm0 pwm
+set gpiomux pwm0 -> pwm
+Now lets tell the kernel that we want to be able to use sysfs to interact with PWM channel 0.
+
+# echo 0 > export
+And we can see that we now have a pwm0 directory:
+
+# ls
+device     export     npwm       pwm0       subsystem  uevent     unexport
+Let’s configure pwm channel 0,
+
+# cd pwm0
+# ls
+duty_cycle  enable      period      polarity    uevent
+duty_cycle - The time in nanoseconds when the PWM signal is asserted
+enable - Write 0 to disable PWM output, 1 to enable
+period - The time in nanoseconds of the entire PWM signal
+polarity - Write normal or inversed to control whether the asserted portion of the PWM signal is a logical high vs. a local low.
+uevent - Used to register notifications for device changes etc.
+The nanosecond units allow for precise control of the PWM period and duty cycle. If we want to configure our PWM for a specific frequency we’ll have to perform some calculations to convert frequency to period.
+
+Let’s configure our PWM to output at 1kHz and a duty cycle of 75%.
+
+period = 1 / frequency
+
+1 / 1khz = 1 / 1000hz = 0.001s period
+
+Converting seconds to nanoseconds,
+
+0.001s * (1000000000ns/1s) = 1000000ns period
+Knowing the period we can calculate the duration of the active portion of the signal, the duty cycle duration in nanoseconds, like:
+
+duty cycle = 10000000ns period * 0.75 = 750000ns
+Now we can configure the pwm and enable it:
+
+# echo 1000000 > period
+# echo 750000 > duty_cycle
+# echo 1 > enable
+
 
 /*
 TODO

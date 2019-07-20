@@ -13,15 +13,21 @@ if [[ -z "$GITSHA" ]]; then
 fi
 
 echo "Compiling Go binary"
-GOOS=linux GOARCH=mipsle go build -o ${NAME} -ldflags "-X main.VERSION=$GITSHA" . 
+GOOS=linux GOARCH=mipsle go build -o ${NAME} -ldflags "-s -w -X main.VERSION=$GITSHA" . 
 if [ "$?" != "0" ]; then
         echo "Failed building binary"
         exit -1
 fi
 
-rsync -P -a $NAME $HOST:/root
-# scp $NAME root@omega-1349.local:/root
+rsync -P -a rc.local $HOST:/etc/rc.local
 if [ "$?" != "0" ]; then
-        echo "Failed tagging $GITSHA container as latest"
+        echo "Failed uploading boot config"
         exit -1
 fi
+
+rsync -P -a $NAME onion-setup.sh $HOST:/root
+if [ "$?" != "0" ]; then
+        echo "Failed uploading binary setup files"
+        exit -1
+fi
+

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -64,13 +65,13 @@ func (t *oneWireTempImpl) Close() error {
 
 func initialize(pin int) (*oneWireTempImpl, error) {
 
-	if err := insmod(pin); err != nil {
-		return nil, err
-	}
+	//if err := insmod(pin); err != nil {
+	//	return nil, err
+	//}
 
 	count, err := slaveCount()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "error getting slave count")
 	}
 
 	if count != 1 {
@@ -111,9 +112,11 @@ func slaveCount() (int, error) {
 		return 0, err
 	}
 
+	data = strings.TrimSpace(data)
+
 	count, err := strconv.Atoi(data)
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrapf(err, "error converting '%s'", data)
 	}
 
 	return count, nil
@@ -126,17 +129,18 @@ func slaveID() (string, error) {
 		return "", err
 	}
 
-	return strings.TrimSpace(data), nil
+	data = strings.TrimSpace(data)
+	return data, nil
 }
 
 // cat /sys/devices/w1_bus_master1/10-00080047e5a0/w1_slave
 // 32 00 4b 46 ff ff 0f 10 3e : crc=3e YES
 // 32 00 4b 46 ff ff 0f 10 3e t=24812
 func readTemperature(id string) (float32, error) {
-	cmd := fmt.Sprintf("/sys/devices/w1_bus_master1/%s/w1_slave")
+	cmd := fmt.Sprintf("/sys/devices/w1_bus_master1/%s/w1_slave", id)
 	data, err := readOneWireData(cmd)
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrapf(err, "error executing '%s'", cmd)
 	}
 
 	fields := strings.Fields(data)

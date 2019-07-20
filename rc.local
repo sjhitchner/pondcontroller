@@ -1,0 +1,5 @@
+# Put this file in /etc/rc.local
+
+sh /root/onion-setup.sh
+
+exit 0

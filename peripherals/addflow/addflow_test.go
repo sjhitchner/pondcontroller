@@ -25,7 +25,7 @@ func (s *AddFlowSuite) Test_AddFlowMonitor(c *C) {
 	pump := &pump.MockPump{}
 	sensor := flowsensor.NewMockFlowSensor()
 
-	addFlow := NewAddFlowMonitor(pump, sensor, 2*time.Second)
+	addFlow := NewAddFlowMonitor(pump, sensor)
 
 	go func() {
 		for i := 0; i < 10; i++ {

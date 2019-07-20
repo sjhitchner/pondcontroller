@@ -8,78 +8,48 @@ import (
 
 const (
 	DefaultFlowSensorCalibration = 0.125
-	HistorySize                  = 600
 )
 
 type PumpFlowMonitor struct {
-	FlowSensor            flowsensor.FlowSensor
-	end                   chan bool
-	flowSensorCalibration float32 // sensor ticks to volume calibration
-
-	history         []float32
-	historyPosition int
-	historySum      float32
+	FlowSensor              flowsensor.FlowSensor
+	end                     chan bool
+	flowSensorTicksPerLiter float32 // sensor ticks to volume calibration
 }
 
 func NewPumpFlowMonitor(sensor flowsensor.FlowSensor) *PumpFlowMonitor {
 	return &PumpFlowMonitor{
-		FlowSensor:            sensor,
-		end:                   make(chan bool),
-		flowSensorCalibration: DefaultFlowSensorCalibration,
-		history:               make([]float32, HistorySize),
-		historyPosition:       0,
-		historySum:            0,
+		FlowSensor:              sensor,
+		end:                     make(chan bool),
+		flowSensorTicksPerLiter: flowsensor.DefaultTicksPerLiter,
 	}
 }
 
-func (t *PumpFlowMonitor) Start() error {
+func (t *PumpFlowMonitor) Start() {
 	log.Info("Starting Pump Flow Monitor")
 
-	flow, err := t.FlowSensor.PerSecondFlow()
-	if err != nil {
-		return err
-	}
+	flow := t.FlowSensor.PerSecondFlow()
 
 	go func() {
 		for {
 			select {
 			case count := <-flow:
-				volume := t.flowSensorCalibration * float32(count)
-				t.addToHistory(volume)
+				volume := float32(count) / t.flowSensorTicksPerLiter
+
+				log.WithFields(log.Fields{
+					"ticks":                count,
+					"metric":               "pump_flow_volume",
+					"volume":               volume,
+					"calibration_flow_tpl": t.flowSensorTicksPerLiter,
+				}).Infof("Pump flow %fL of water (%d ticks)", volume, count)
 
 			case <-t.end:
 				return
 			}
 		}
 	}()
-
-	return nil
 }
 
 func (t *PumpFlowMonitor) Close() error {
 	t.end <- true
 	return nil
-}
-
-func (t *PumpFlowMonitor) addToHistory(value float32) {
-	//advance position
-	t.historyPosition++
-	if t.historyPosition >= HistorySize {
-		t.historyPosition = 0
-	}
-
-	// Remove previous value
-	t.historySum -= t.history[t.historyPosition]
-
-	// add new value
-	t.history[t.historyPosition] = value
-	t.historySum += value
-}
-
-func (t *PumpFlowMonitor) FlowAverage() float32 {
-	return t.historySum / HistorySize
-}
-
-func (t *PumpFlowMonitor) FlowHistory() []float32 {
-	return t.history
 }
